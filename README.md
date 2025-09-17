@@ -41,14 +41,28 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 This repository is being developed step-by-step in public. Each stage includes goals, decisions, and learnings that you can follow.
 
-- Stage 1: Idea & Structure → see the docs below
+### Stages
+
+- **Stage 1: Idea & Structure** ✅
   - [MVP Scope](./docs/stage-1/mvp.md)
   - [Stack Decision](./docs/stage-1/stack.md)
   - [Data Model & ER Diagram](./docs/stage-1/data-model.md)
   - [LinkedIn Post Draft](./docs/stage-1/linkedin-post-stage-1.md)
 
+- **Stage 2: Repository Setup & Environment** ✅
+  - [Repository Setup](./docs/stage-2/repository-setup.md)
+  - [LinkedIn Post Draft](./docs/stage-2/linkedin-post-stage-2.md)
+
+- **Stage 3: UI Design & Component Architecture** ✅
+  - [UI Design](./docs/stage-3/ui-design.md)
+  - [LinkedIn Post Draft](./docs/stage-3/linkedin-post-stage-3.md)
+
+- **Stage 4: Skeleton Frontend** ✅
+  - [Skeleton Frontend](./docs/stage-4/skeleton-frontend.md)
+  - [LinkedIn Post Draft](./docs/stage-4/linkedin-post-stage-4.md)
+
 ### Roadmap
 
-- [۲۰ روز، قدم‌به‌قدم: نقشه راه پروژه](./docs/roadmap.md)
+- [۱۰ روز، قدم‌به‌قدم: نقشه راه پروژه](./docs/roadmap.md)
 
 If you want to follow along, watch this repo and connect on LinkedIn.
