@@ -1,0 +1,29 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30         # 30 ثانیه
+      arrivalRate: 10      # 10 درخواست در ثانیه
+    - duration: 30
+      arrivalRate: 20      # 20 درخواست در ثانیه
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Todo API Load Test - No Rate Limiting"
+    flow:
+      - get:
+          url: "/health"     # Health check
+      - get:
+          url: "/api/test"   # تست endpoint
+      - get:
+          url: "/api/todos"  # دریافت todos
+      - post:
+          url: "/api/todos"
+          json:
+            title: "Test Todo {{ $randomString() }}"
+            done: false
+      - get:
+          url: "/api/todos/status?done=false"  # فیلتر todos
+      - get:
+          url: "/api/todos/count"  # تعداد todos
