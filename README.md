@@ -61,6 +61,9 @@ This repository is being developed step-by-step in public. Each stage includes g
   - [Skeleton Frontend](./docs/stage-4/skeleton-frontend.md)
   - [LinkedIn Post Draft](./docs/stage-4/linkedin-post-stage-4.md)
 
+- **Stages 2-4: Combined Implementation** ✅
+  - [LinkedIn Post Draft - Stages 2-4](./docs/stages-2-4/linkedin-post-stages-2-4.md)
+
 ### Roadmap
 
 - [۱۰ روز، قدم‌به‌قدم: نقشه راه پروژه](./docs/roadmap.md)

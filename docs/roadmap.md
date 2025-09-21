@@ -15,8 +15,20 @@
 | روز | هدف | جزئیات و چالش |
 | --- | --- | --- |
 | **4** | **Skeleton Frontend** | ایجاد صفحات خالی و روتینگ Next.js، NavBar، Layout. چالش: معماری پوشه‌ها و ساخت Layout قابل گسترش. |
-| **5** | **اتصال به دیتابیس** | نصب MongoDB و Mongoose، ساخت مدل‌های User و Habit. چالش: طراحی ارتباط یک‌به‌چند (User→Habits). |
-| **6** | **CRUD عادت‌ها** | API: create/read/update/delete برای Habit. چالش: ولیدیشن (Zod) و هندل خطا. |
+| **5** | **اتصال به دیتابیس** | ✅ **تکمیل شده**: نصب MongoDB و Mongoose، ساخت مدل‌های User و Habit با validation کامل. طراحی ارتباط یک‌به‌چند (User→Habits) با indexing مناسب. |
+| **6** | **CRUD عادت‌ها** | ✅ **تکمیل شده**: API کامل create/read/update/delete برای Habit. پیاده‌سازی Repository pattern، Service layer، و Controller layer. اضافه کردن middleware های امنیتی و validation. |
+
+#### کارهای اضافی انجام شده
+
+| ویژگی | توضیحات |
+| --- | --- |
+| **معماری MVC** | ✅ پیاده‌سازی کامل Model-View-Controller pattern با جداسازی concerns |
+| **Middleware های امنیتی** | ✅ Helmet، CORS، Rate Limiting، Compression، Security Headers |
+| **Event System** | ✅ Event Emitter برای اطلاع‌رسانی تغییرات habits |
+| **Validation Layer** | ✅ Validation کامل با Joi و Zod برای ورودی‌ها |
+| **Error Handling** | ✅ Centralized error handling و response formatting |
+| **Repository Pattern** | ✅ جداسازی logic دیتابیس از business logic |
+| **TypeScript Support** | ✅ پشتیبانی کامل TypeScript با type definitions |
 
 #### روزهای 7 تا 9
 
