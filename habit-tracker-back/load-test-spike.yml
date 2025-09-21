@@ -1,0 +1,41 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30         # 30 ثانیه - بار عادی
+      arrivalRate: 10
+    - duration: 10         # 10 ثانیه - اسپایک
+      arrivalRate: 1000    # 1000 درخواست در ثانیه
+    - duration: 30         # 30 ثانیه - بازگشت به بار عادی
+      arrivalRate: 10
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+
+scenarios:
+  - name: "Spike Test - Habit Operations"
+    weight: 60
+    flow:
+      - get:
+          url: "/api/habits"
+      - post:
+          url: "/api/habits"
+          json:
+            name: "Spike Test Habit {{ $randomString() }}"
+            description: "Spike test {{ $randomInt(1, 1000) }}"
+            frequency: "daily"
+            category: "spike"
+      - get:
+          url: "/api/habits/count"
+
+  - name: "Spike Test - User Operations"
+    weight: 40
+    flow:
+      - get:
+          url: "/api/users"
+      - post:
+          url: "/api/users"
+          json:
+            username: "spikeuser{{ $randomInt(1, 10000) }}"
+            email: "spike{{ $randomInt(1, 10000) }}@test.com"
+            password: "spikepass123"

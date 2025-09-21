@@ -1,0 +1,101 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    # Phase 1: Normal load (realistic user behavior)
+    - duration: 60         # 1 minute
+      arrivalRate: 5       # 5 requests per second (normal usage)
+    # Phase 2: Moderate load (busy period)
+    - duration: 120        # 2 minutes  
+      arrivalRate: 15      # 15 requests per second (busy period)
+    # Phase 3: High load (peak usage)
+    - duration: 60         # 1 minute
+      arrivalRate: 30      # 30 requests per second (peak usage)
+    # Phase 4: Stress test (system limits)
+    - duration: 30         # 30 seconds
+      arrivalRate: 50      # 50 requests per second (stress test)
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+      User-Agent: "HabitTrackerApp/1.0"
+
+scenarios:
+  - name: "Realistic User Workflow"
+    weight: 60
+    flow:
+      # User logs in and checks habits
+      - get:
+          url: "/api/habits/"
+          capture:
+            - json: "$[0]._id"
+              as: "habitId"
+      - get:
+          url: "/api/habits/count"
+      
+      # User creates a new habit
+      - post:
+          url: "/api/habits/"
+          json:
+            name: "Daily Exercise {{ $randomString() }}"
+            description: "30 minutes of physical activity"
+            frequency: "daily"
+            category: "health"
+      
+      # User updates existing habit
+      - put:
+          url: "/api/habits/{{ habitId }}"
+          json:
+            name: "Updated Habit {{ $randomString() }}"
+            completed: true
+          ifTrue: "{{ habitId }}"
+      
+      # User checks habit details
+      - get:
+          url: "/api/habits/{{ habitId }}"
+          ifTrue: "{{ habitId }}"
+
+  - name: "User Management Workflow"
+    weight: 25
+    flow:
+      # Check existing users
+      - get:
+          url: "/api/users/"
+          capture:
+            - json: "$[0]._id"
+              as: "userId"
+      - get:
+          url: "/api/users/count"
+      
+      # Create new user
+      - post:
+          url: "/api/users/"
+          json:
+            username: "user{{ $randomInt(1, 100000) }}"
+            email: "user{{ $randomInt(1, 100000) }}@example.com"
+            password: "securepassword123"
+      
+      # Get user details
+      - get:
+          url: "/api/users/{{ userId }}"
+          ifTrue: "{{ userId }}"
+
+  - name: "Mixed Operations"
+    weight: 15
+    flow:
+      # Quick operations
+      - get:
+          url: "/api/habits/"
+      - get:
+          url: "/api/users/"
+      - get:
+          url: "/api/habits/count"
+      - get:
+          url: "/api/users/count"
+      
+      # Create operations
+      - post:
+          url: "/api/habits/"
+          json:
+            name: "Quick Habit {{ $randomString() }}"
+            frequency: "weekly"
+            category: "productivity"

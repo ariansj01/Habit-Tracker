@@ -4,8 +4,12 @@ const { notify } = require('../utils/habitEmitter');
 
 const getAllHabits = async (req, res) => {
     try {
-        const habits = await habitService.findAll();
-        successResponse(res, 200, habits, 'Habits fetched successfully');
+        const result = await habitService.findAll();
+        if (result.success) {
+            successResponse(res, 200, result.data, 'Habits fetched successfully');
+        } else {
+            errorResponse(res, 500, result.error);
+        }
     } catch (error) {
         errorResponse(res, 500, error.message);
     }

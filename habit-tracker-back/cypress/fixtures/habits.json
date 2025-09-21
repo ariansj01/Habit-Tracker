@@ -1,0 +1,40 @@
+{
+  "validHabit": {
+    "name": "Morning Exercise",
+    "description": "30 minutes of cardio exercise every morning",
+    "frequency": "daily",
+    "category": "health"
+  },
+  "invalidHabit": {
+    "name": "",
+    "description": "Invalid habit without name",
+    "frequency": "invalid",
+    "category": ""
+  },
+  "updateHabit": {
+    "name": "Updated Morning Exercise",
+    "description": "45 minutes of cardio exercise every morning",
+    "frequency": "daily",
+    "category": "fitness"
+  },
+  "testHabits": [
+    {
+      "name": "Test Habit 1",
+      "description": "Test description 1",
+      "frequency": "daily",
+      "category": "health"
+    },
+    {
+      "name": "Test Habit 2",
+      "description": "Test description 2",
+      "frequency": "weekly",
+      "category": "productivity"
+    },
+    {
+      "name": "Test Habit 3",
+      "description": "Test description 3",
+      "frequency": "monthly",
+      "category": "learning"
+    }
+  ]
+}

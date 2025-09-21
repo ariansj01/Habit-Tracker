@@ -1,0 +1,61 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30         # 30 ثانیه
+      arrivalRate: 10      # 10 درخواست در ثانیه
+    - duration: 30
+      arrivalRate: 20      # 20 درخواست در ثانیه
+    - duration: 60
+      arrivalRate: 50      # 50 درخواست در ثانیه
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+
+scenarios:
+  - name: "Habit Tracker API Load Test - No Rate Limiting"
+    weight: 70
+    flow:
+      - get:
+          url: "/api/habits/"
+          capture:
+            - json: "$[0]._id"
+              as: "habitId"
+      - get:
+          url: "/api/habits/count"
+      - post:
+          url: "/api/habits/"
+          json:
+            name: "Test Habit {{ $randomString() }}"
+            description: "Load test habit {{ $randomInt(1, 1000) }}"
+            frequency: "daily"
+            category: "health"
+      - get:
+          url: "/api/habits/{{ habitId }}"
+          ifTrue: "{{ habitId }}"
+      - put:
+          url: "/api/habits/{{ habitId }}"
+          json:
+            name: "Updated Habit {{ $randomString() }}"
+            completed: true
+          ifTrue: "{{ habitId }}"
+
+  - name: "User API Load Test - No Rate Limiting"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/users/"
+          capture:
+            - json: "$[0]._id"
+              as: "userId"
+      - get:
+          url: "/api/users/count"
+      - post:
+          url: "/api/users/"
+          json:
+            username: "testuser{{ $randomInt(1, 10000) }}"
+            email: "test{{ $randomInt(1, 10000) }}@example.com"
+            password: "testpassword123"
+      - get:
+          url: "/api/users/{{ userId }}"
+          ifTrue: "{{ userId }}"

@@ -5,25 +5,57 @@ config:
       arrivalRate: 10      # 10 درخواست در ثانیه
     - duration: 30
       arrivalRate: 20      # 20 درخواست در ثانیه
+    - duration: 60
+      arrivalRate: 50      # 50 درخواست در ثانیه - تست فشار بالا
   defaults:
     headers:
       Content-Type: "application/json"
+      Accept: "application/json"
 
 scenarios:
-  - name: "Todo API Load Test - No Rate Limiting"
+  - name: "Habit Tracker API Load Test"
+    weight: 70
     flow:
       - get:
-          url: "/health"     # Health check
+          url: "/api/habits"
+          capture:
+            - json: "$[0]._id"
+              as: "habitId"
       - get:
-          url: "/api/test"   # تست endpoint
-      - get:
-          url: "/api/todos"  # دریافت todos
+          url: "/api/habits/count"
       - post:
-          url: "/api/todos"
+          url: "/api/habits"
           json:
-            title: "Test Todo {{ $randomString() }}"
-            done: false
+            name: "Test Habit {{ $randomString() }}"
+            description: "Load test habit {{ $randomInt(1, 1000) }}"
+            frequency: "daily"
+            category: "health"
       - get:
-          url: "/api/todos/status?done=false"  # فیلتر todos
+          url: "/api/habits/{{ habitId }}"
+          ifTrue: "{{ habitId }}"
+      - put:
+          url: "/api/habits/{{ habitId }}"
+          json:
+            name: "Updated Habit {{ $randomString() }}"
+            completed: true
+          ifTrue: "{{ habitId }}"
+
+  - name: "User API Load Test"
+    weight: 30
+    flow:
       - get:
-          url: "/api/todos/count"  # تعداد todos
+          url: "/api/users"
+          capture:
+            - json: "$[0]._id"
+              as: "userId"
+      - get:
+          url: "/api/users/count"
+      - post:
+          url: "/api/users"
+          json:
+            username: "testuser{{ $randomInt(1, 10000) }}"
+            email: "test{{ $randomInt(1, 10000) }}@example.com"
+            password: "testpassword123"
+      - get:
+          url: "/api/users/{{ userId }}"
+          ifTrue: "{{ userId }}"

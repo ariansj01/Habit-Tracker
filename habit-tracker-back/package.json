@@ -3,11 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "dev": "node app.js",
+    "start": "nodemon app.js",
     "build": "tsc",
     "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix"
+    "lint:fix": "eslint src --ext .ts --fix",
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:headless": "cypress run --headless",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox",
+    "test:edge": "cypress run --browser edge",
+    "load-test": "artillery run load-test-no-limit.yml",
+    "load-test:no-limit": "artillery run load-test-no-rate-limit.yml",
+    "load-test:production": "artillery run load-test-production.yml",
+    "load-test:rate-limit": "artillery run load-test-rate-limit.yml",
+    "load-test:stress": "artillery run load-test-stress.yml",
+    "load-test:spike": "artillery run load-test-spike.yml",
+    "load-test:report": "artillery run load-test-no-limit.yml --output report.json && artillery report report.json",
+    "test:runner": "node scripts/test-runner.js",
+    "test:all": "node scripts/test-runner.js all"
   },
   "dependencies": {
     "@fastify/cors": "^8.4.0",
@@ -34,6 +49,8 @@
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
+    "artillery": "^2.0.0",
+    "cypress": "^13.6.0",
     "eslint": "^8.55.0",
     "tsx": "^4.6.0",
     "typescript": "^5.3.0"

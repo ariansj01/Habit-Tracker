@@ -4,7 +4,7 @@ const cors = require('./cors');
 const errorHandler = require('./errorHandler');
 const healthCheck = require('./healthCheck');
 const logging = require('./logging');
-const rateLimit = require('./rateLimit');
+const { limitation, apiLimitation } = require('./rateLimit');
 const security = require('./security');
 const slowDown = require('./slowDown');
 const validation = require('./validation');
@@ -17,7 +17,8 @@ const middleware = (app) => {
     app.use(express.urlencoded({ extended: true, limit: '10mb' })) // Form data parsing
     app.use(cors) // CORS
     app.use(slowDown) // Slow down suspicious requests
-    app.use(rateLimit) // Rate limiting
+    app.use(limitation) // General rate limiting
+    app.use('/api', apiLimitation) // API-specific rate limiting
 };
 
 module.exports = middleware;

@@ -1,0 +1,29 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    # Phase 1: Test rate limit boundaries
+    - duration: 30         # 30 seconds
+      arrivalRate: 10      # 10 requests per second
+    # Phase 2: Exceed rate limit
+    - duration: 30         # 30 seconds
+      arrivalRate: 100     # 100 requests per second (should trigger rate limiting)
+    # Phase 3: Back to normal
+    - duration: 30         # 30 seconds
+      arrivalRate: 5       # 5 requests per second
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+
+scenarios:
+  - name: "Rate Limit Test - API Endpoints"
+    weight: 100
+    flow:
+      - get:
+          url: "/api/habits/"
+      - get:
+          url: "/api/users/"
+      - get:
+          url: "/api/habits/count"
+      - get:
+          url: "/api/users/count"

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const userRepository = require('../repositories/user.repository');
 const  {validateEmail, validatePassword, validateName, validateId} = require('../utils/validation');
+
 const findAll = async () => {
     try {
         const GetAll = await userRepository.findAll()

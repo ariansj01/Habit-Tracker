@@ -1,0 +1,55 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60         # 1 دقیقه
+      arrivalRate: 100     # 100 درخواست در ثانیه
+    - duration: 120        # 2 دقیقه
+      arrivalRate: 200     # 200 درخواست در ثانیه
+    - duration: 60         # 1 دقیقه
+      arrivalRate: 500     # 500 درخواست در ثانیه - تست استرس
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+
+scenarios:
+  - name: "Stress Test - High Volume"
+    weight: 50
+    flow:
+      - get:
+          url: "/api/habits"
+      - post:
+          url: "/api/habits"
+          json:
+            name: "Stress Test Habit {{ $randomString() }}"
+            description: "Stress test {{ $randomInt(1, 10000) }}"
+            frequency: "daily"
+            category: "{{ $randomString() }}"
+      - get:
+          url: "/api/habits/count"
+
+  - name: "Stress Test - User Operations"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/users"
+          json:
+            username: "stressuser{{ $randomInt(1, 100000) }}"
+            email: "stress{{ $randomInt(1, 100000) }}@test.com"
+            password: "stresspass123"
+      - get:
+          url: "/api/users"
+
+  - name: "Stress Test - Mixed Operations"
+    weight: 20
+    flow:
+      - get:
+          url: "/api/habits"
+      - get:
+          url: "/api/users"
+      - post:
+          url: "/api/habits"
+          json:
+            name: "Mixed Test {{ $randomString() }}"
+            frequency: "weekly"
+            category: "mixed"

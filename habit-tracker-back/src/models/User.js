@@ -8,6 +8,11 @@ const UserSchema = new Schema(
     displayName: { type: String, required: true, minlength: 2, maxlength: 50 },
     avatarUrl: { type: String },
     timezone: { type: String },
+    refreshTokens: [{ 
+      token: { type: String, required: true },
+      expiresAt: { type: Date, required: true },
+      createdAt: { type: Date, default: Date.now }
+    }],
     settings: {
       weekStart: { type: Number, default: 6 },
       locale: { type: String, default: 'fa-IR' },
