@@ -1,71 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Habit Tracker – Frontend (Next.js 14)
+
+## Overview
+A Persian RTL-friendly habit tracking UI built with Next.js App Router, React Query, and Tailwind. It supports large-scale usage via client-side caching, pagination-ready API, and resilient UX.
+
+## Tech
+- Next.js 14 (App Router)
+- TypeScript
+- React Query (@tanstack/react-query)
+- Tailwind CSS
+- next/font (Vazirmatn, Geist)
+- Axios
 
 ## Getting Started
-
-First, run the development server:
-
+1. Install deps
+```bash
+npm install
+```
+2. Environment
+```bash
+cp .env.example .env.local
+# Set NEXT_PUBLIC_API_URL to your backend base, e.g.
+# NEXT_PUBLIC_API_URL=http://localhost:3000/api
+```
+3. Run
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Key Features
+- Axios client with auth interceptors (`src/lib/api-client.ts`)
+- React Query for list/detail mutations with invalidation (`src/lib/hooks/use-habits.ts`)
+- Toggle complete/unarchive with optimistic UX
+- Real streaks fetched from backend; robust fallback to 0 when endpoint not ready
+- RTL and Persian font via `next/font` (Vazirmatn)
+- Sidebar layout applied across dashboard pages
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
+- `src/app` – routes and pages
+- `src/components` – UI, layout, providers
+- `src/lib` – API, hooks, utils
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
+- `dev` – start dev server
+- `build` – production build
+- `start` – run production
 
-## Learn More
+## Notes
+- Ensure you login to obtain JWT so protected endpoints work.
+- Pagination is backend-driven; frontend reads pages by query params when needed.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
----
-
-## Build-in-Public: Simple Habit Tracker
-
-This repository is being developed step-by-step in public. Each stage includes goals, decisions, and learnings that you can follow.
-
-### Stages
-
-- **Stage 1: Idea & Structure** ✅
-  - [MVP Scope](./docs/stage-1/mvp.md)
-  - [Stack Decision](./docs/stage-1/stack.md)
-  - [Data Model & ER Diagram](./docs/stage-1/data-model.md)
-  - [LinkedIn Post Draft](./docs/stage-1/linkedin-post-stage-1.md)
-
-- **Stage 2: Repository Setup & Environment** ✅
-  - [Repository Setup](./docs/stage-2/repository-setup.md)
-  - [LinkedIn Post Draft](./docs/stage-2/linkedin-post-stage-2.md)
-
-- **Stage 3: UI Design & Component Architecture** ✅
-  - [UI Design](./docs/stage-3/ui-design.md)
-  - [LinkedIn Post Draft](./docs/stage-3/linkedin-post-stage-3.md)
-
-- **Stage 4: Skeleton Frontend** ✅
-  - [Skeleton Frontend](./docs/stage-4/skeleton-frontend.md)
-  - [LinkedIn Post Draft](./docs/stage-4/linkedin-post-stage-4.md)
-
-- **Stages 2-4: Combined Implementation** ✅
-  - [LinkedIn Post Draft - Stages 2-4](./docs/stages-2-4/linkedin-post-stages-2-4.md)
-
-### Roadmap
-
-- [۱۰ روز، قدم‌به‌قدم: نقشه راه پروژه](./docs/roadmap.md)
-
-If you want to follow along, watch this repo and connect on LinkedIn.
+## Scaling
+- Virtualization can be added with `react-virtuoso` or `react-window` for very large lists.
+- Fine-tune React Query `staleTime`/`gcTime` for traffic patterns.

@@ -1,84 +1,176 @@
-import { CheckCircle, Circle, Calendar } from 'lucide-react'
+"use client"
+
+import { CheckCircle, Circle, Calendar, Flame, Target, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { useHabits, useCompleteHabit } from '@/lib/hooks/use-habits'
+import { useHabitStreak } from '@/lib/hooks/use-streak'
+import { type Habit } from '@/lib/api'
 
-// Mock data for demonstration
-const mockHabits = [
-  { id: '1', name: 'ورزش روزانه', completed: true },
-  { id: '2', name: 'مطالعه', completed: false },
-  { id: '3', name: 'مدیتیشن', completed: true },
-]
+// Component for individual habit tracking with streak info
+function HabitTrackingCard({ 
+  habit, 
+  isCompleted, 
+  onComplete 
+}: { 
+  habit: Habit
+  isCompleted: boolean
+  onComplete: () => void
+}) {
+  const { data: streakData } = useHabitStreak((habit as any)._id)
 
-const mockCalendarData = [
-  { date: '2024-01-01', habits: { '1': true, '2': false, '3': true } },
-  { date: '2024-01-02', habits: { '1': true, '2': true, '3': false } },
-  { date: '2024-01-03', habits: { '1': false, '2': true, '3': true } },
-]
+  return (
+    <div className="flex items-center justify-between p-4 border rounded-lg bg-card">
+      <div className="flex items-center gap-4">
+        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+          isCompleted ? 'bg-green-500 border-green-500' : 'border-gray-300'
+        }`}>
+          {isCompleted && <CheckCircle className="w-4 h-4 text-white" />}
+        </div>
+        
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className={`font-medium ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
+              {habit.name}
+            </span>
+            {habit.description && (
+              <span className="text-sm text-muted-foreground">- {habit.description}</span>
+            )}
+          </div>
+          
+          {/* Streak Information */}
+          <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Flame className="w-4 h-4 text-orange-500" />
+              استریک: <strong className="text-orange-600">{streakData?.currentStreak || 0}</strong>
+            </span>
+            <span className="flex items-center gap-1">
+              <Target className="w-4 h-4 text-blue-500" />
+              بهترین: <strong className="text-blue-600">{streakData?.longestStreak || 0}</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <Button
+        variant={isCompleted ? "secondary" : "primary"}
+        size="sm"
+        onClick={() => {
+          console.log('Button clicked for habit:', habit.name)
+          onComplete()
+        }}
+        disabled={isCompleted}
+        className={isCompleted ? "text-green-600" : ""}
+      >
+        {isCompleted ? (
+          <>
+            <CheckCircle className="h-4 w-4 mr-2" />
+            انجام شده
+          </>
+        ) : (
+          <>
+            <Circle className="h-4 w-4 mr-2" />
+            تکمیل کن
+          </>
+        )}
+      </Button>
+    </div>
+  )
+}
 
 export default function TrackingPage() {
-  const today = new Date().toLocaleDateString('fa-IR')
-  
+  const { data: habits = [], isLoading: habitsLoading } = useHabits()
+  const completeHabit = useCompleteHabit()
+
+  // Calculate stats based on archived habits
+  const activeHabits = habits.filter(habit => !habit.archived)
+  const completedToday = habits.filter(habit => habit.archived === true).length
+  const totalToday = activeHabits.length + completedToday // equals habits.length
+  const progressPercentage = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0
+
+  console.log('Total habits:', habits.length)
+  console.log('Completed habits:', completedToday)
+  console.log('Active habits:', activeHabits.length)
+
+  const handleCompleteHabit = async (habitId: string, currentArchived?: boolean) => {
+    console.log('Completing habit:', habitId)
+    try {
+      await completeHabit.mutateAsync({ id: habitId, currentArchived })
+      console.log('Habit completed via API')
+    } catch (error) {
+      console.error('Error completing habit:', error)
+    }
+  }
+
+  if (habitsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">در حال بارگذاری...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">پیگیری روزانه</h1>
         <p className="text-muted-foreground">
-          وضعیت عادت‌های امروز: {today}
+          وضعیت عادت‌های امروز
         </p>
       </div>
 
-      {/* Today's Progress */}
+      {/* Progress Overview */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">پیشرفت امروز</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{progressPercentage}%</div>
+            <p className="text-xs text-muted-foreground">
+              {completedToday} از {activeHabits.length} عادت
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">انجام شده</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{completedToday}</div>
+            <p className="text-xs text-muted-foreground">عادت امروز</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">باقی‌مانده</CardTitle>
+            <Circle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{Math.max(activeHabits.length - completedToday, 0)}</div>
+            <p className="text-xs text-muted-foreground">عادت باقی‌مانده</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Progress Bar */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            امروز
-          </CardTitle>
-          <CardDescription>
-            وضعیت عادت‌های امروز
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {mockHabits.map((habit) => (
-              <div
-                key={habit.id}
-                className="flex items-center justify-between p-3 border rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  {habit.completed ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                  ) : (
-                    <Circle className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <span className={habit.completed ? "line-through text-muted-foreground" : ""}>
-                    {habit.name}
-                  </span>
-                </div>
-                <Button
-                  variant={habit.completed ? "secondary" : "default"}
-                  size="sm"
-                >
-                  {habit.completed ? "انجام شده" : "انجام نشده"}
-                </Button>
-              </div>
-            ))}
-          </div>
-          
-          {/* Progress Summary */}
-          <div className="mt-4 p-4 bg-muted rounded-lg">
-            <div className="flex justify-between items-center text-sm">
-              <span>پیشرفت امروز:</span>
-              <span className="font-medium">
-                {mockHabits.filter(h => h.completed).length} از {mockHabits.length}
-              </span>
+        <CardContent className="pt-6">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>پیشرفت امروز</span>
+              <span>{completedToday} از {totalToday}</span>
             </div>
-            <div className="mt-2 w-full bg-background rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-3">
               <div
-                className="bg-primary h-2 rounded-full transition-all"
+                className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-500"
                 style={{
-                  width: `${(mockHabits.filter(h => h.completed).length / mockHabits.length) * 100}%`
+                  width: `${Math.max(0, Math.min(100, progressPercentage))}%`
                 }}
               />
             </div>
@@ -86,75 +178,41 @@ export default function TrackingPage() {
         </CardContent>
       </Card>
 
-      {/* Weekly Calendar */}
+      {/* Today's Habits with Detailed Info */}
       <Card>
         <CardHeader>
-          <CardTitle>تقویم هفتگی</CardTitle>
+          <CardTitle>عادت‌های امروز</CardTitle>
           <CardDescription>
-            وضعیت عادت‌ها در هفته جاری
+            وضعیت عادت‌های امروز شما با جزئیات استریک
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {mockCalendarData.map((day) => (
-              <div key={day.date} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium">
-                    {new Date(day.date).toLocaleDateString('fa-IR')}
-                  </span>
-                  <div className="flex gap-1">
-                    {Object.entries(day.habits).map(([habitId, completed]) => (
-                      <div
-                        key={habitId}
-                        className={`w-3 h-3 rounded-full ${
-                          completed ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
-                        title={mockHabits.find(h => h.id === habitId)?.name}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {Object.values(day.habits).filter(Boolean).length} از {Object.keys(day.habits).length}
-                </span>
+          <div className="space-y-4">
+            {activeHabits.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>هنوز عادتی اضافه نکرده‌اید</p>
+                <p className="text-sm">اولین عادت خود را اضافه کنید</p>
               </div>
-            ))}
+            ) : (
+              activeHabits.map((habit) => {
+                const habitId = (habit as any)._id
+                // Check if habit is completed (archived: true)
+                const isCompleted = habit.archived === true
+                console.log('Checking habit completion:', habit.name, habitId, isCompleted, 'archived:', habit.archived)
+                return (
+                  <HabitTrackingCard 
+                    key={(habit as any)._id} 
+                    habit={habit} 
+                    isCompleted={isCompleted}
+                    onComplete={() => handleCompleteHabit((habit as any)._id, (habit as any).archived)}
+                  />
+                )
+              })
+            )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">میانگین روزانه</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2.3</div>
-            <p className="text-xs text-muted-foreground">عادت انجام شده</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">بهترین استریک</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">7</div>
-            <p className="text-xs text-muted-foreground">روز متوالی</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">درصد موفقیت</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">76%</div>
-            <p className="text-xs text-muted-foreground">این هفته</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }

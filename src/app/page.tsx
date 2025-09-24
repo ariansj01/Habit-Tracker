@@ -1,24 +1,44 @@
+"use client"
+
 import Link from 'next/link'
-import { Plus, TrendingUp, Calendar, Target } from 'lucide-react'
+import { Plus, TrendingUp, Calendar, Target, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { useHabits, useCompleteHabit } from '@/lib/hooks/use-habits'
 
-// Mock data for demonstration
-const mockStats = {
-  totalHabits: 3,
-  completedToday: 2,
-  weeklyStreak: 5,
-  successRate: 76
-}
-
-const mockTodayHabits = [
-  { id: '1', name: 'ورزش روزانه', completed: true },
-  { id: '2', name: 'مطالعه', completed: false },
-  { id: '3', name: 'مدیتیشن', completed: true },
-]
+import DashboardLayout from './(dashboard)/layout'
 
 export default function HomePage() {
-  return (
+  const { data: habits = [], isLoading: habitsLoading } = useHabits()
+  const completeHabit = useCompleteHabit()
+
+  // Calculate stats based on archived habits
+  const activeHabits = habits.filter(habit => !habit.archived)
+  const completedToday = habits.filter(habit => habit.archived === true).length
+  const totalHabits = habits.length
+  const totalToday = activeHabits.length + completedToday // equals habits.length
+  const rawPct = totalToday > 0 ? (completedToday / totalToday) * 100 : 0
+  const successRate = Math.max(0, Math.min(100, Math.round(rawPct)))
+
+  const handleCompleteHabit = async (habitId: string, currentArchived?: boolean) => {
+    console.log('Completing habit:', habitId)
+    try {
+      await completeHabit.mutateAsync({ id: habitId, currentArchived })
+      console.log('Habit completed via API')
+    } catch (error) {
+      console.error('Error completing habit:', error)
+    }
+  }
+
+  if (habitsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">در حال بارگذاری...</div>
+      </div>
+    )
+  }
+
+  const content = (
     <div className="space-y-6">
       {/* Welcome Section */}
       <div>
@@ -36,7 +56,7 @@ export default function HomePage() {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStats.totalHabits}</div>
+            <div className="text-2xl font-bold">{totalHabits}</div>
           </CardContent>
         </Card>
         
@@ -46,17 +66,7 @@ export default function HomePage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStats.completedToday}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">استریک هفتگی</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mockStats.weeklyStreak}</div>
+            <div className="text-2xl font-bold">{completedToday}</div>
           </CardContent>
         </Card>
         
@@ -66,7 +76,17 @@ export default function HomePage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockStats.successRate}%</div>
+            <div className="text-2xl font-bold">{successRate}%</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">باقی‌مانده</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{Math.max(activeHabits.length - completedToday, 0)}</div>
           </CardContent>
         </Card>
       </div>
@@ -81,39 +101,55 @@ export default function HomePage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {mockTodayHabits.map((habit) => (
-              <div
-                key={habit.id}
-                className="flex items-center justify-between p-3 border rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    habit.completed ? 'bg-green-500' : 'bg-gray-300'
-                  }`} />
-                  <span className={habit.completed ? "line-through text-muted-foreground" : ""}>
-                    {habit.name}
-                  </span>
+            {habits.map((habit) => {
+              // Check if habit is completed (archived: true)
+              const isCompleted = habit.archived === true
+              return (
+                <div
+                  key={(habit as any)._id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${
+                      isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                    }`} />
+                    <span className={isCompleted ? "line-through text-muted-foreground" : ""}>
+                      {habit.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-medium ${
+                      isCompleted ? 'text-green-600' : 'text-muted-foreground'
+                    }`}>
+                      {isCompleted ? 'انجام شده' : 'انجام نشده'}
+                    </span>
+                    {!isCompleted && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleCompleteHabit((habit as any)._id, (habit as any).archived)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <span className={`text-sm font-medium ${
-                  habit.completed ? 'text-green-600' : 'text-muted-foreground'
-                }`}>
-                  {habit.completed ? 'انجام شده' : 'انجام نشده'}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
           
           {/* Progress Bar */}
           <div className="mt-4">
             <div className="flex justify-between text-sm mb-2">
               <span>پیشرفت امروز</span>
-              <span>{mockStats.completedToday} از {mockStats.totalHabits}</span>
+              <span>{completedToday} از {totalToday}</span>
             </div>
             <div className="w-full bg-muted rounded-full h-2">
               <div
                 className="bg-primary h-2 rounded-full transition-all"
                 style={{
-                  width: `${(mockStats.completedToday / mockStats.totalHabits) * 100}%`
+                  width: `${successRate}%`
                 }}
               />
             </div>
@@ -168,5 +204,12 @@ export default function HomePage() {
         </Card>
         </div>
     </div>
+  )
+
+  // Wrap with dashboard layout to ensure sidebar/header
+  return (
+    <DashboardLayout>
+      {content}
+    </DashboardLayout>
   )
 }

@@ -21,9 +21,11 @@ export function Layout({ children }: LayoutProps) {
           onClose={() => setSidebarOpen(false)} 
         />
         
-        <main className="flex-1 md:ml-64">
-          <div className="container mx-auto p-6">
-            {children}
+        <main className="flex-1 md:ml-64 min-w-0">
+          <div className="container mx-auto p-4 md:p-6 max-w-6xl">
+            <div className="space-y-6">
+              {children}
+            </div>
           </div>
         </main>
       </div>

@@ -5,15 +5,18 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { useCreateHabit } from '@/lib/hooks/use-habits'
 
 export default function AddHabitPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    color: '#4CAF50',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
+  const createHabit = useCreateHabit()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,17 +41,20 @@ export default function AddHabitPage() {
     }
 
     try {
-      // TODO: API call will be implemented in Stage 6
-      console.log('Creating habit:', formData)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Redirect to habits list
+      await createHabit.mutateAsync({
+        name: formData.name.trim(),
+        description: formData.description.trim() || undefined,
+        color: formData.color,
+      })
       router.push('/habits')
-    } catch (error) {
-      console.error('Error creating habit:', error)
-      setErrors({ general: 'خطا در ایجاد عادت. لطفاً دوباره تلاش کنید.' })
+    } catch (error: any) {
+      if (error?.message === 'USER_ID_NOT_SET') {
+        setErrors({ general: 'شناسه کاربر تنظیم نشده است. NEXT_PUBLIC_USER_ID را در .env.local تعریف کنید.' })
+      } else if (typeof error?.message === 'string' && error.message.includes('duplicate key')) {
+        setErrors({ general: 'عادت با این نام قبلاً وجود دارد.' })
+      } else {
+        setErrors({ general: error?.message || 'خطا در ایجاد عادت. لطفاً دوباره تلاش کنید.' })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -104,14 +110,32 @@ export default function AddHabitPage() {
               onChange={(e) => handleInputChange('description', e.target.value)}
               helperText="توضیحات بیشتر در مورد این عادت"
             />
+
+            <div>
+              <label className="block text-sm font-medium mb-2">رنگ</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={formData.color}
+                  onChange={(e) => handleInputChange('color', e.target.value)}
+                  className="w-12 h-10 rounded border"
+                />
+                <Input
+                  value={formData.color}
+                  onChange={(e) => handleInputChange('color', e.target.value)}
+                  placeholder="#4CAF50"
+                  className="flex-1"
+                />
+              </div>
+            </div>
             
             <div className="flex gap-3 pt-4">
               <Button
                 type="submit"
-                loading={isLoading}
-                disabled={isLoading}
+                loading={isLoading || createHabit.isPending}
+                disabled={isLoading || createHabit.isPending}
               >
-                {isLoading ? 'در حال ایجاد...' : 'ایجاد عادت'}
+                {isLoading || createHabit.isPending ? 'در حال ایجاد...' : 'ایجاد عادت'}
               </Button>
               
               <Button
