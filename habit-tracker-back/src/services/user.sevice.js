@@ -41,17 +41,24 @@ const create = async (userData) => {
     if (!validateEmail(userData.email)) {
         return { success: false, error: 'Invalid email' };
     }
-    if (!validatePassword(userData.passwordHash)) {
-        return { success: false, error: 'Invalid password' };
-    }
+    // if (!validatePassword(userData.passwordHash)) {
+    //     return { success: false, error: 'Invalid password' };
+    // }
     if (!validateName(userData.displayName)) {
         return { success: false, error: 'Invalid name' };
     }
-    const { email, passwordHash, displayName, avatarUrl, timezone, settings } = userData
-    const password = await bcrypt.hash(passwordHash, 10)
+    const { email, password, displayName, avatarUrl, timezone, settings } = userData
+    const passwordHash = await bcrypt.hash(password, 10)
     try {
-        const GetById = await userRepository.create(email, password, displayName, avatarUrl, timezone, settings)
-        return { success: true, data: GetById, message: 'User created successfully' };
+        const createdUser = await userRepository.create({
+            email,
+            passwordHash,
+            displayName,
+            avatarUrl,
+            timezone,
+            settings
+        })
+        return { success: true, data: createdUser, message: 'User created successfully' };
     } catch (error) {
         console.log(error)
         return { success: false, error: error.message };
@@ -65,17 +72,24 @@ const update = async (id, userData) => {
     if (!validateEmail(userData.email)) {
         return { success: false, error: 'Invalid email' };
     }
-    if (!validatePassword(userData.passwordHash)) {
+    if (!validatePassword(userData.password)) {
         return { success: false, error: 'Invalid password' };
     }
     if (!validateName(userData.displayName)) {
         return { success: false, error: 'Invalid name' };
     }
-    const { email, passwordHash, displayName, avatarUrl, timezone, settings } = userData
-    const password = await bcrypt.hash(passwordHash, 10)
+    const { email, password, displayName, avatarUrl, timezone, settings } = userData
+    const passwordHash = await bcrypt.hash(password, 10)
     try {
-        const GetById = await userRepository.update(id, email, password, displayName, avatarUrl, timezone, settings)
-        return { success: true, data: GetById, message: 'User updated successfully' };
+        const updatedUser = await userRepository.update(id, {
+            email,
+            passwordHash,
+            displayName,
+            avatarUrl,
+            timezone,
+            settings
+        })
+        return { success: true, data: updatedUser, message: 'User updated successfully' };
     } catch (error) {
         console.log(error)
         return { success: false, error: error.message };

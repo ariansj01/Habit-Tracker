@@ -11,11 +11,16 @@ const HabitSchema = new Schema(
     frequency: { type: String, enum: ['daily'], default: 'daily' },
     startDate: { type: String },
     order: { type: Number },
+    // Streak fields
+    currentStreak: { type: Number, default: 0 },
+    longestStreak: { type: Number, default: 0 },
+    lastCompletedDate: { type: String, default: null },
   },
   { timestamps: true }
 );
 
 HabitSchema.index({ userId: 1, archived: 1 });
+HabitSchema.index({ userId: 1, createdAt: -1 });
 // Optional partial unique index to prevent duplicate active names
 // Note: Requires MongoDB 3.2+ for partial indexes
 HabitSchema.index(
